@@ -1,0 +1,43 @@
+{{define "content"}}
+<div class="hero min-h-screen bg-base-200">
+    <div class="hero-content flex-col lg:flex-row-reverse">
+        <div class="text-center lg:text-left">
+            <h1 class="text-5xl font-bold">Register</h1>
+            <p class="py-6">Create a new account.</p>
+        </div>
+        <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+            <div class="card-body">
+                <form hx-post="/register" hx-target="#response" hx-swap="innerHTML">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Mobile Number</span>
+                        </label>
+                        <input type="text" name="mobile" placeholder="017..." class="input input-bordered" required />
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Password</span>
+                        </label>
+                        <input type="password" name="password" placeholder="password" class="input input-bordered"
+                            required />
+                    </div>
+                    <div class="form-control mt-6">
+                        <button class="btn btn-primary">Register</button>
+                    </div>
+                    <div id="response" class="text-error mt-2"></div>
+                </form>
+                <div class="divider">OR</div>
+                <a href="/login-page" class="btn btn-outline btn-sm">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.body.addEventListener('htmx:afterRequest', function (evt) {
+        if (evt.detail.xhr.status === 201) {
+            alert("Registered! Please login.");
+            window.location.href = '/login-page';
+        }
+    });
+</script>
+{{end}}

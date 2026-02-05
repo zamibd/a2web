@@ -1,0 +1,68 @@
+{{define "content"}}
+<div class="prose mb-8">
+    <h1>Admin Panel</h1>
+    <a href="/logout" class="btn btn-secondary ml-4">Logout</a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Users</h2>
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Mobile</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Users}}
+                        <tr>
+                            <td>{{.Mobile}}</td>
+                            <td>{{.Role}}</td>
+                            <td>
+                                <button hx-delete="/admin/user/delete?id={{.ID}}" hx-confirm="Are you sure?"
+                                    hx-target="closest tr" hx-swap="outerHTML"
+                                    class="btn btn-error btn-xs">Delete</button>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Sessions</h2>
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Sessions}}
+                        <tr>
+                            <td>{{.Name}}</td>
+                            <td>{{.Status}}</td>
+                            <td>
+                                <button hx-delete="/admin/session/delete?id={{.ID}}" hx-confirm="Are you sure?"
+                                    hx-target="closest tr" hx-swap="outerHTML"
+                                    class="btn btn-error btn-xs">Delete</button>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

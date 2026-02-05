@@ -1,0 +1,42 @@
+{{define "content"}}
+<div class="hero min-h-screen bg-base-200">
+    <div class="hero-content flex-col lg:flex-row-reverse">
+        <div class="text-center lg:text-left">
+            <h1 class="text-5xl font-bold">Login now!</h1>
+            <p class="py-6">Access your audio streams securely.</p>
+        </div>
+        <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+            <div class="card-body">
+                <form hx-post="/login" hx-target="#response" hx-swap="innerHTML">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Mobile Number</span>
+                        </label>
+                        <input type="text" name="mobile" placeholder="017..." class="input input-bordered" required />
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Password</span>
+                        </label>
+                        <input type="password" name="password" placeholder="password" class="input input-bordered"
+                            required />
+                    </div>
+                    <div class="form-control mt-6">
+                        <button class="btn btn-primary">Login</button>
+                    </div>
+                    <div id="response" class="text-error mt-2"></div>
+                </form>
+                <div class="divider">OR</div>
+                <a href="/register-page" class="btn btn-outline btn-sm">Create Account</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.body.addEventListener('htmx:afterRequest', function (evt) {
+        if (evt.detail.xhr.status === 200 && evt.detail.pathInfo.requestPath === '/login') {
+            window.location.href = '/dashboard';
+        }
+    });
+</script>
+{{end}}

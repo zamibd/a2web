@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    container_name: a2web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - ./storage:/app/storage
+      - ./.env:/app/.env
+    env_file:
+      - .env

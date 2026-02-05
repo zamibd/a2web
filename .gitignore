@@ -1,0 +1,16 @@
+# Binaries
+server
+
+# Environment variables
+.env
+
+# Storage (SQLite DBs and media)
+storage/
+*.db
+
+# Logs
+*.log
+
+# OS specific
+.DS_Store
+.vscode/

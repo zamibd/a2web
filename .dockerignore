@@ -1,0 +1,16 @@
+# Git
+.git
+.gitignore
+
+# Docker
+docker-compose.yml
+.dockerignore
+
+# Build output
+server
+
+# Local development
+.env
+storage/
+*.db
+*.log

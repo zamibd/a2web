@@ -1,0 +1,25 @@
+{{define "content"}}
+<div class="prose mb-8">
+    <h1>Dashboard</h1>
+    <button hx-post="/session/create" hx-target="#session-list" hx-swap="afterbegin" class="btn btn-primary">Create
+        Session</button>
+    <a href="/logout" class="btn btn-secondary ml-4">Logout</a>
+</div>
+
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+        <h2 class="card-title">My Sessions</h2>
+        <ul id="session-list" class="menu bg-base-200 w-full rounded-box">
+            {{range .Sessions}}
+            <li>
+                <div class="flex justify-between">
+                    <a href="/user/{{.ID}}" class="font-bold">{{.Name}}</a>
+                    <span class="badge badge-success">{{.Status}}</span>
+                    <a href="/kids/{{.ID}}" target="_blank" class="link link-primary">Kids Link</a>
+                </div>
+            </li>
+            {{end}}
+        </ul>
+    </div>
+</div>
+{{end}}
