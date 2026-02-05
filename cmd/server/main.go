@@ -23,7 +23,10 @@ func main() {
 	slog.SetDefault(logger)
 
 	// 2. Initialize Database
-	os.MkdirAll("./storage", 0755) // Ensure storage dir exists
+	if err := os.MkdirAll("./storage", 0755); err != nil {
+		logger.Error("Failed to create storage directory", "error", err)
+		os.Exit(1)
+	}
 	database.InitDB(config.AppConfig.DBPath)
 	logger.Info("Database initialized", "path", config.AppConfig.DBPath)
 

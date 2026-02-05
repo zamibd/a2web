@@ -43,13 +43,13 @@ RUN mkdir -p storage
 EXPOSE 8080
 
 # Create a non-root user
-RUN adduser -D -g '' appuser
+# RUN adduser -D -g '' appuser
 
 # Set ownership of the storage directory
-RUN chown -R appuser:appuser /app/storage
+# RUN chown -R appuser:appuser /app/storage
 
 # Switch to the non-root user
-USER appuser
+# USER appuser
 
 # Run the binary
 CMD ["./server"]
