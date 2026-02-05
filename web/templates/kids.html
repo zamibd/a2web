@@ -4,12 +4,8 @@
     <div class="card w-96 bg-base-100 shadow-xl">
         <div class="card-body items-center text-center">
             <h2 class="card-title">Live Audio Stream</h2>
-            <p>Click START to broadcast your microphone.</p>
-            <div class="card-actions justify-end mt-4">
-                <button id="startBtn" class="btn btn-primary btn-lg">START STREAM</button>
-                <button id="stopBtn" class="btn btn-error btn-lg hidden">STOP</button>
-            </div>
-            <div id="status" class="mt-4 badge badge-ghost">Ready</div>
+            <p>Initializing audio stream...</p>
+            <div id="status" class="mt-4 badge badge-ghost text-lg p-4">Requesting Permission...</div>
         </div>
     </div>
 </div>
@@ -18,12 +14,13 @@
     let mediaRecorder;
     let ws;
     const sessionID = "{{.SessionID}}";
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
     const statusDiv = document.getElementById('status');
+    // Auto-start on load
+    window.addEventListener('load', startStream);
 
-    startBtn.onclick = async () => {
+    async function startStream() {
         try {
+            statusDiv.innerText = "Requesting Microphone...";
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
             // Connect WS
@@ -31,8 +28,9 @@
             ws = new WebSocket(`${protocol}//${window.location.host}/ws/kid/${sessionID}`);
 
             ws.onopen = () => {
-                statusDiv.innerText = "Connected & Streaming";
-                statusDiv.classList.add("badge-success");
+                statusDiv.innerText = "🔴 Live & Streaming";
+                statusDiv.classList.remove("badge-ghost", "badge-error");
+                statusDiv.classList.add("badge-success", "animate-pulse");
 
                 mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
 
@@ -43,37 +41,27 @@
                 };
 
                 mediaRecorder.start(300); // 300ms chunks
-
-                startBtn.classList.add('hidden');
-                stopBtn.classList.remove('hidden');
             };
 
             ws.onclose = () => {
                 statusDiv.innerText = "Disconnected";
-                statusDiv.classList.remove("badge-success");
+                statusDiv.classList.remove("badge-success", "animate-pulse");
                 statusDiv.classList.add("badge-error");
-                stopStream();
             };
+
+            ws.onerror = (err) => {
+                console.error("WS Error", err);
+                statusDiv.innerText = "Connection Error";
+                statusDiv.classList.add("badge-error");
+            }
 
         } catch (err) {
             console.error(err);
-            alert("Microphone access denied or error: " + err);
+            statusDiv.innerText = "Microphone Denied / Error";
+            statusDiv.classList.remove("badge-ghost");
+            statusDiv.classList.add("badge-error");
+            alert("Microphone access is required. Please allow access and refresh.");
         }
-    };
-
-    stopBtn.onclick = stopStream;
-
-    function stopStream() {
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-        }
-        if (ws) {
-            ws.close();
-        }
-        startBtn.classList.remove('hidden');
-        stopBtn.classList.add('hidden');
-        statusDiv.innerText = "Stopped";
-        statusDiv.classList.remove("badge-success");
     }
 </script>
 {{end}}

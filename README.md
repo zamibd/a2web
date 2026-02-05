@@ -41,13 +41,24 @@ A minimal, real-time audio streaming application built with Go. This application
    ```
    The server will start on port `8080`.
 
+## Configuration
+Create a `.env` file (or set environment variables) to configure the application:
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `PORT` | Server listening port | `8080` |
+| `ALLOWED_ORIGIN` | Allowed Origin for WebSockets/CORS | `*` (dev) or `https://apis.imzami.com` (prod) |
+| `JWT_SECRET` | Secret key for session tokens | `secret` |
+| `DB_PATH` | Path to SQLite database | `./storage/audio_streamer.db` |
+
+
 ## Usage Guide
 1. **Register**: Go to `/register-page` to create an account.
 2. **Login**: Login with your mobile credentials.
 3. **Create Session**: On the Dashboard, click "Create Session".
 4. **Start Stream**: 
-   - Open the **Kids Link** (`/kids/{id}`) on the broadcasting device.
-   - Click **START STREAM**.
+   - Share the **Kids Link** (`/kids/{id}`) with the broadcasting device.
+   - **Auto-Start**: The page will automatically request microphone permission and start streaming immediately. No login required.
 5. **Listen**:
    - Open the Session link (`/user/{id}`) on the listening device.
    - Audio will play automatically (you may need to interact with the page first due to browser autoplay policies).
