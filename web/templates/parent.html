@@ -1,77 +1,158 @@
 {{define "content"}}
-<div class="flex flex-col items-center justify-center min-h-screen">
-    <h1 class="text-3xl font-bold mb-4">Monitoring Session</h1>
-    <div class="card w-96 bg-base-100 shadow-xl">
-        <div class="card-body items-center text-center">
-            <h2 class="card-title">Live Feed</h2>
-            <p>Audio should play automatically when stream is active.</p>
-            <audio id="audioPlayer" controls class="mt-4"></audio>
-            <div id="status" class="mt-4 badge badge-ghost">Connecting...</div>
+<div class="flex flex-col items-center justify-center min-h-screen bg-base-200">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-primary">Monitoring Session</h1>
+        <p class="py-2 text-base-content/70">Receiving from Child Device</p>
+    </div>
+
+    <div class="card w-96 bg-base-100 shadow-xl relative overflow-hidden">
+        <div class="card-body items-center text-center z-10">
+            <h2 class="card-title text-2xl mb-4">Live Audio Feed</h2>
+
+            <!-- Connection Status -->
+            <div id="status" class="badge badge-lg badge-ghost p-4 text-lg w-full">Waiting...</div>
+
+            <!-- Audio Controls (Hidden initially or visual only) -->
+            <div class="mt-8 w-full">
+                <audio id="audioPlayer" controls class="w-full hidden"></audio>
+                <!-- Visualizer placeholder could go here -->
+                <div id="visualizer"
+                    class="h-12 w-full bg-base-300 rounded-full overflow-hidden flex items-center justify-center animate-pulse">
+                    <span class="text-xs text-base-content/50">Audio Buffer</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Autoplay Overlay -->
+        <div id="overlay"
+            class="absolute inset-0 bg-base-100/90 z-20 flex flex-col items-center justify-center backdrop-blur-sm">
+            <button id="startBtn" class="btn btn-primary btn-lg gap-2 shadow-lg animate-bounce">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Click to Start Listening
+            </button>
+            <p class="mt-4 text-sm font-semibold text-base-content/70">Required to enable audio</p>
         </div>
     </div>
-    <a href="/dashboard" class="btn btn-ghost mt-8">Back to Dashboard</a>
+
+    <a href="/dashboard" class="btn btn-ghost mt-8 gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Dashboard
+    </a>
 </div>
 
 <script>
     const sessionID = "{{.SessionID}}";
     const statusDiv = document.getElementById('status');
     const audioPlayer = document.getElementById('audioPlayer');
+    const startBtn = document.getElementById('startBtn');
+    const overlay = document.getElementById('overlay');
+    const visualizer = document.getElementById('visualizer');
 
-    // MediaSource Approach for low latency streaming
-    const mediaSource = new MediaSource();
-    audioPlayer.src = URL.createObjectURL(mediaSource);
-
+    let mediaSource;
     let sourceBuffer;
     let queue = [];
+    let ws;
+    let isListening = false;
 
-    mediaSource.addEventListener('sourceopen', () => {
-        // Need to know codec. usually audio/webm; codecs=opus
-        sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs=opus');
-        sourceBuffer.mode = 'sequence';
+    startBtn.addEventListener('click', () => {
+        isListening = true;
 
-        sourceBuffer.addEventListener('updateend', () => {
-            if (queue.length > 0 && !sourceBuffer.updating) {
-                sourceBuffer.appendBuffer(queue.shift());
-            }
-        });
+        // Show controls, hide overlay
+        overlay.classList.add('hidden');
+        audioPlayer.classList.remove('hidden');
+        visualizer.classList.add('hidden'); // Swap visualizer for real player
 
-        connectWS();
+        // Initialize Audio
+        initAudio();
     });
+
+    function initAudio() {
+        mediaSource = new MediaSource();
+        audioPlayer.src = URL.createObjectURL(mediaSource);
+
+        mediaSource.addEventListener('sourceopen', () => {
+            // Setup Buffer
+            try {
+                if (MediaSource.isTypeSupported('audio/webm; codecs=opus')) {
+                    sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs=opus');
+                } else {
+                    sourceBuffer = mediaSource.addSourceBuffer('audio/webm'); // Fallback
+                }
+            } catch (e) {
+                console.error("SourceBuffer Error:", e);
+                statusDiv.innerText = "Codec Error";
+                statusDiv.classList.add("badge-error");
+                return;
+            }
+
+            sourceBuffer.mode = 'sequence';
+            sourceBuffer.addEventListener('updateend', () => {
+                if (queue.length > 0 && !sourceBuffer.updating) {
+                    try {
+                        sourceBuffer.appendBuffer(queue.shift());
+                    } catch (e) { console.error("Append error", e); }
+                }
+            });
+
+            // Start WS after audio is ready
+            connectWS();
+
+            // Force play
+            audioPlayer.play().catch(e => console.error("Play error:", e));
+        });
+    }
 
     function connectWS() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/parent/${sessionID}`);
-
-        ws.binaryType = 'arraybuffer'; // Critical for handling binary audio data
+        const wsUrl = `${protocol}//${window.location.host}/ws/parent/${sessionID}`;
+        ws = new WebSocket(wsUrl);
+        ws.binaryType = 'arraybuffer';
 
         ws.onopen = () => {
             statusDiv.innerText = "Connected & Listening";
-            statusDiv.classList.add("badge-success");
+            statusDiv.classList.remove("badge-ghost", "badge-error");
+            statusDiv.classList.add("badge-success", "animate-pulse");
         };
 
         ws.onmessage = async (event) => {
+            if (!isListening) return;
+
             const data = event.data;
             if (sourceBuffer && !sourceBuffer.updating) {
                 try {
                     sourceBuffer.appendBuffer(data);
                 } catch (e) {
-                    console.error(e);
+                    console.error("Buffer error", e);
                 }
             } else {
                 queue.push(data);
             }
 
-            // Ensure playing
-            if (audioPlayer.paused) {
-                audioPlayer.play().catch(e => console.log("Autoplay blocked:", e));
+            // Keep playing if it stalled
+            if (audioPlayer.paused && sourceBuffer && !sourceBuffer.updating) {
+                audioPlayer.play().catch(e => { });
             }
         };
 
         ws.onclose = () => {
             statusDiv.innerText = "Disconnected";
-            statusDiv.classList.remove("badge-success");
+            statusDiv.classList.remove("badge-success", "animate-pulse");
             statusDiv.classList.add("badge-error");
         };
+
+        ws.onerror = (e) => {
+            console.error(e);
+            statusDiv.innerText = "Connection Error";
+            statusDiv.classList.add("badge-error");
+        }
     }
 </script>
 {{end}}

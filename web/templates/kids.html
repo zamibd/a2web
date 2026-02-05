@@ -1,11 +1,52 @@
 {{define "content"}}
-<div class="flex flex-col items-center justify-center min-h-screen">
-    <h1 class="text-3xl font-bold mb-4">Session: {{.SessionName}}</h1>
-    <div class="card w-96 bg-base-100 shadow-xl">
+<div class="flex flex-col items-center justify-center min-h-screen bg-base-200">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-primary">Session: {{.SessionName}}</h1>
+        <p class="py-2 text-base-content/70">Broadcasting to Parent</p>
+    </div>
+
+    <div class="card w-96 bg-base-100 shadow-2xl">
         <div class="card-body items-center text-center">
-            <h2 class="card-title">Live Audio Stream</h2>
-            <p>Initializing audio stream...</p>
-            <div id="status" class="mt-4 badge badge-ghost text-lg p-4">Requesting Permission...</div>
+            <h2 class="card-title text-2xl mb-4">Live Audio Stream</h2>
+
+            <!-- Status Indicator -->
+            <div id="status-container" class="flex flex-col items-center gap-4 w-full">
+                <div id="status" class="badge badge-lg badge-ghost p-4 text-lg w-full h-auto">Initializing...</div>
+
+                <!-- Hidden Error / Help Section -->
+                <div id="error-help" class="hidden flex flex-col gap-3 w-full">
+                    <p class="text-sm text-error font-medium">Microphone access is needed to stream.</p>
+                    <div class="bg-base-200 p-3 rounded-lg text-left">
+                        <p class="text-xs font-bold mb-1">Troubleshooting:</p>
+                        <ul class="text-xs list-disc pl-5 text-base-content/70">
+                            <li>Check browser address bar for "Blocked" icon.</li>
+                            <li>Click "Allow" if prompted.</li>
+                            <li>Ensure device isn't muted.</li>
+                        </ul>
+                    </div>
+                    <button id="retryBtn" class="btn btn-primary w-full" onclick="startStream()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Retry Access
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Animation (Mic Pulse) - Visual candy -->
+            <div id="mic-animation" class="hidden mt-6 relative">
+                <span class="loading loading-ring loading-lg text-success scale-150"></span>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -15,12 +56,20 @@
     let ws;
     const sessionID = "{{.SessionID}}";
     const statusDiv = document.getElementById('status');
+    const errorHelpDiv = document.getElementById('error-help');
+    const micAnim = document.getElementById('mic-animation');
+
     // Auto-start on load
     window.addEventListener('load', startStream);
 
     async function startStream() {
+        // Reset UI state
+        statusDiv.innerText = "Requesting Microphone...";
+        statusDiv.className = "badge badge-lg badge-warning p-4 text-lg w-full h-auto";
+        errorHelpDiv.classList.add('hidden');
+        micAnim.classList.add('hidden');
+
         try {
-            statusDiv.innerText = "Requesting Microphone...";
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
             // Connect WS
@@ -29,8 +78,8 @@
 
             ws.onopen = () => {
                 statusDiv.innerText = "🔴 Live & Streaming";
-                statusDiv.classList.remove("badge-ghost", "badge-error");
-                statusDiv.classList.add("badge-success", "animate-pulse");
+                statusDiv.className = "badge badge-lg badge-success p-4 text-lg w-full h-auto animate-pulse";
+                micAnim.classList.remove('hidden');
 
                 mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
 
@@ -44,24 +93,31 @@
             };
 
             ws.onclose = () => {
-                statusDiv.innerText = "Disconnected";
-                statusDiv.classList.remove("badge-success", "animate-pulse");
-                statusDiv.classList.add("badge-error");
+                showError("Disconnected from Server");
             };
 
             ws.onerror = (err) => {
                 console.error("WS Error", err);
-                statusDiv.innerText = "Connection Error";
-                statusDiv.classList.add("badge-error");
+                showError("Connection Error");
             }
 
         } catch (err) {
             console.error(err);
-            statusDiv.innerText = "Microphone Denied / Error";
-            statusDiv.classList.remove("badge-ghost");
-            statusDiv.classList.add("badge-error");
-            alert("Microphone access is required. Please allow access and refresh.");
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                showError("Microphone Access Denied");
+            } else if (err.name === 'NotFoundError') {
+                showError("No Microphone Found");
+            } else {
+                showError("Error: " + err.message);
+            }
         }
+    }
+
+    function showError(msg) {
+        statusDiv.innerText = msg;
+        statusDiv.className = "badge badge-lg badge-error p-4 text-lg w-full h-auto font-bold";
+        errorHelpDiv.classList.remove('hidden');
+        micAnim.classList.add('hidden');
     }
 </script>
 {{end}}
