@@ -7,7 +7,7 @@
         </div>
         <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
             <div class="card-body">
-                <form hx-post="/register" hx-target="#response" hx-swap="innerHTML">
+                <form hx-post="/register" hx-ext="json-enc" hx-target="#response" hx-swap="innerHTML">
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text">Mobile Number</span>
