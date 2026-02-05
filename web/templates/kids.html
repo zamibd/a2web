@@ -70,6 +70,9 @@
         micAnim.classList.add('hidden');
 
         try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("HTTPS_REQUIRED");
+            }
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
             // Connect WS
@@ -107,6 +110,8 @@
                 showError("Microphone Access Denied");
             } else if (err.name === 'NotFoundError') {
                 showError("No Microphone Found");
+            } else if (err.message === 'HTTPS_REQUIRED') {
+                showError("HTTPS Required for Mic Access");
             } else {
                 showError("Error: " + err.message);
             }
