@@ -41,6 +41,20 @@ A minimal, real-time audio streaming application built with Go. This application
    ```
    The server will start on port `8080`.
 
+### Deployment with SSL (HTTPS)
+This project uses **Caddy** to automatically handle SSL certificates.
+
+1.  **Prerequisites**:
+    -   Ensure your domain (e.g., `apis.imzami.com`) points to your server's IP.
+    -   Ensure ports **80** and **443** are open on your firewall.
+
+2.  **Deploy**:
+    ```bash
+    docker compose up -d
+    ```
+
+Caddy will automatically obtain a certificate from Let's Encrypt and serve the app securely at `https://apis.imzami.com`.
+
 ## Configuration
 Create a `.env` file (or set environment variables) to configure the application:
 

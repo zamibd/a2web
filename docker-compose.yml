@@ -1,4 +1,17 @@
 services:
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
   app:
     build: .
     container_name: a2web
@@ -16,3 +29,7 @@ services:
       - ./.env:/app/.env
     env_file:
       - .env
+
+volumes:
+  caddy_data:
+  caddy_config:

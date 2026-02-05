@@ -1,0 +1,7 @@
+{
+    email zamibd@gmail.com
+}
+
+http://apis.imzami.com, https://apis.imzami.com {
+    reverse_proxy app:8080
+}
