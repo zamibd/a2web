@@ -1,0 +1,25 @@
+{
+  "name": "a2web",
+  "version": "1.0.0",
+  "description": "A minimal, real-time audio streaming application built with Go. This application allows a user to \"broadcast\" live microphone audio from one device (e.g., a child's playroom) to another device (e.g., a parent's dashboard) via WebSockets. It includes authentication, session management, and audio recording.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zamibd/a2web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zamibd/a2web/issues"
+  },
+  "homepage": "https://github.com/zamibd/a2web#readme",
+  "devDependencies": {
+    "daisyui": "^5.5.18",
+    "tailwindcss": "^3.4.19"
+  }
+}

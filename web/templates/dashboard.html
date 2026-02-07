@@ -1,25 +1,153 @@
 {{define "content"}}
-<div class="prose mb-8">
-    <h1>Dashboard</h1>
-    <button hx-post="/session/create" hx-target="#session-list" hx-swap="afterbegin" class="btn btn-primary">Create
-        Session</button>
-    <a href="/logout" class="btn btn-secondary ml-4">Logout</a>
-</div>
+<div class="min-h-screen bg-gradient-to-br from-base-200 via-base-300 to-base-200 p-4 lg:p-8">
+    <div class="max-w-7xl mx-auto space-y-6">
 
-<div class="card bg-base-100 shadow-xl">
-    <div class="card-body">
-        <h2 class="card-title">My Sessions</h2>
-        <ul id="session-list" class="menu bg-base-200 w-full rounded-box">
-            {{range .Sessions}}
-            <li>
-                <div class="flex justify-between">
-                    <a href="/user/{{.ID}}" class="font-bold">{{.Name}}</a>
-                    <span class="badge badge-success">{{.Status}}</span>
-                    <a href="/kids/{{.ID}}" target="_blank" class="link link-primary">Kids Link</a>
+        <!-- Header Section -->
+        <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-base-100 p-6 rounded-2xl shadow-lg border border-base-300">
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Dashboard
+                </h1>
+                <p class="text-base-content/60 mt-1">Manage your audio streaming sessions</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <button hx-post="/session/create" hx-target="#session-list" hx-swap="afterbegin"
+                    class="btn btn-primary gap-2 w-full sm:w-auto group">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Create Session</span>
+                </button>
+                <a href="/logout" class="btn btn-outline gap-2 w-full sm:w-auto">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div
+                class="stat bg-base-100 rounded-2xl shadow-lg border border-base-300 hover:shadow-xl transition-shadow">
+                <div class="stat-figure text-primary">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
                 </div>
-            </li>
+                <div class="stat-title">Total Sessions</div>
+                <div class="stat-value text-primary">{{len .Sessions}}</div>
+                <div class="stat-desc">All time</div>
+            </div>
+
+            <div
+                class="stat bg-base-100 rounded-2xl shadow-lg border border-base-300 hover:shadow-xl transition-shadow">
+                <div class="stat-figure text-success">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="stat-title">Active Sessions</div>
+                <div class="stat-value text-success">{{len .Sessions}}</div>
+                <div class="stat-desc">Currently running</div>
+            </div>
+
+            <div
+                class="stat bg-base-100 rounded-2xl shadow-lg border border-base-300 hover:shadow-xl transition-shadow">
+                <div class="stat-figure text-secondary">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                </div>
+                <div class="stat-title">Streaming</div>
+                <div class="stat-value text-secondary">Live</div>
+                <div class="stat-desc">Real-time audio</div>
+            </div>
+        </div>
+
+        <!-- Sessions Section -->
+        <div class="bg-base-100 rounded-2xl shadow-lg border border-base-300 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold flex items-center gap-2">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    My Sessions
+                </h2>
+                <span class="badge badge-lg badge-ghost">{{len .Sessions}} total</span>
+            </div>
+
+            {{if .Sessions}}
+            <div id="session-list" class="grid grid-cols-1 gap-4">
+                {{range .Sessions}}
+                <div class="card bg-base-200 hover:bg-base-300 transition-all hover:shadow-md border border-base-300">
+                    <div class="card-body p-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h3 class="font-bold text-lg">{{.Name}}</h3>
+                                    {{if eq .Status "active"}}
+                                    <span class="badge badge-success gap-1">
+                                        <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                                        Active
+                                    </span>
+                                    {{else}}
+                                    <span class="badge badge-ghost">{{.Status}}</span>
+                                    {{end}}
+                                </div>
+                                <p class="text-sm text-base-content/60">Session ID: {{.ID}}</p>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                                <a href="/user/{{.ID}}" class="btn btn-sm btn-primary gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Monitor
+                                </a>
+                                <a href="/kids/{{.ID}}" target="_blank" class="btn btn-sm btn-outline gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                    Kids Link
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <svg class="w-24 h-24 mx-auto text-base-content/20 mb-4" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h3 class="text-xl font-bold text-base-content/60 mb-2">No sessions yet</h3>
+                <p class="text-base-content/40 mb-6">Create your first session to start streaming audio</p>
+                <button hx-post="/session/create" hx-target="#session-list" hx-swap="afterbegin"
+                    class="btn btn-primary gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create Your First Session
+                </button>
+            </div>
             {{end}}
-        </ul>
+        </div>
     </div>
 </div>
 {{end}}

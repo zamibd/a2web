@@ -1,42 +1,135 @@
 {{define "content"}}
-<div class="hero min-h-screen bg-base-200">
-    <div class="hero-content flex-col lg:flex-row-reverse">
-        <div class="text-center lg:text-left">
-            <h1 class="text-5xl font-bold">Register</h1>
-            <p class="py-6">Create a new account.</p>
+<div class="min-h-screen bg-gradient-to-br from-base-200 via-base-300 to-base-200 flex items-center justify-center p-4">
+    <div class="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-12">
+
+        <!-- Left Side - Branding & Info -->
+        <div class="flex-1 text-center lg:text-left space-y-6 max-w-lg">
+            <div class="space-y-4">
+                <div class="inline-block">
+                    <div class="flex items-center gap-3 justify-center lg:justify-start">
+                        <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <h1
+                            class="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            Audio Streamer
+                        </h1>
+                    </div>
+                </div>
+                <p class="text-xl text-base-content/70">
+                    Join thousands monitoring audio in real-time
+                </p>
+                <div class="stats stats-vertical lg:stats-horizontal shadow bg-base-100/50 backdrop-blur">
+                    <div class="stat place-items-center">
+                        <div class="stat-title">Latency</div>
+                        <div class="stat-value text-primary text-2xl">&lt;100ms</div>
+                    </div>
+                    <div class="stat place-items-center">
+                        <div class="stat-title">Uptime</div>
+                        <div class="stat-value text-success text-2xl">99.9%</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-            <div class="card-body">
-                <form hx-post="/register" hx-ext="json-enc" hx-target="#response" hx-swap="innerHTML">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Mobile Number</span>
-                        </label>
-                        <input type="text" name="mobile" placeholder="017..." class="input input-bordered" required />
-                    </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Password</span>
-                        </label>
-                        <input type="password" name="password" placeholder="password" class="input input-bordered"
-                            required />
-                    </div>
-                    <div class="form-control mt-6">
-                        <button class="btn btn-primary">Register</button>
-                    </div>
-                    <div id="response" class="text-error mt-2"></div>
-                </form>
-                <div class="divider">OR</div>
-                <a href="/login-page" class="btn btn-outline btn-sm">Login</a>
+
+        <!-- Right Side - Register Form -->
+        <div class="w-full max-w-md">
+            <div class="card bg-base-100 shadow-2xl border border-base-300">
+                <div class="card-body p-8">
+                    <h2 class="text-2xl font-bold text-center mb-2">Create Account</h2>
+                    <p class="text-center text-sm text-base-content/60 mb-6">Get started in seconds</p>
+
+                    <form hx-post="/register" hx-ext="json-enc" hx-target="#response" hx-swap="innerHTML"
+                        class="space-y-4">
+                        <!-- Mobile Number Input -->
+                        <div class="form-control flex flex-col">
+                            <label class="label">
+                                <span class="label-text font-medium">Mobile Number</span>
+                                <span class="label-text-alt text-xs">Used for login</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                </div>
+                                <input type="text" name="mobile" placeholder="017..."
+                                    class="input input-bordered w-full pl-10 focus:input-primary transition-all"
+                                    required />
+                            </div>
+                        </div>
+
+                        <!-- Password Input -->
+                        <div class="form-control flex flex-col">
+                            <label class="label">
+                                <span class="label-text font-medium">Password</span>
+                                <span class="label-text-alt text-xs">Min. 6 characters</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <input type="password" name="password" placeholder="••••••••"
+                                    class="input input-bordered w-full pl-10 focus:input-primary transition-all"
+                                    minlength="6" required />
+                            </div>
+                        </div>
+
+                        <!-- Error/Success Message -->
+                        <div id="response" class="text-error text-sm min-h-[20px]"></div>
+
+                        <!-- Submit Button -->
+                        <div class="form-control mt-6">
+                            <button class="btn btn-primary btn-block gap-2 group">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                                <span>Create Account</span>
+                            </button>
+                        </div>
+
+                        <!-- Terms Notice -->
+                        <p class="text-xs text-center text-base-content/50 mt-4">
+                            By registering, you agree to our Terms of Service
+                        </p>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="divider text-sm text-base-content/50">Already have an account?</div>
+
+                    <!-- Login Link -->
+                    <a href="/login-page" class="btn btn-outline btn-block gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Sign In</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
     document.body.addEventListener('htmx:afterRequest', function (evt) {
         if (evt.detail.xhr.status === 201) {
-            alert("Registered! Please login.");
-            window.location.href = '/login-page';
+            // Show success message
+            document.getElementById('response').className = 'text-success text-sm min-h-[20px]';
+            document.getElementById('response').textContent = '✓ Account created! Redirecting to login...';
+
+            // Redirect after short delay
+            setTimeout(function () {
+                window.location.href = '/login-page';
+            }, 1500);
         }
     });
 </script>
