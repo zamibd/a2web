@@ -46,6 +46,7 @@ func (h *Handler) KidWSHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer f.Close()
 
+	isFirstChunk := true
 	for {
 		messageType, p, err := conn.ReadMessage()
 		if err != nil {
@@ -54,6 +55,12 @@ func (h *Handler) KidWSHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if messageType == websocket.BinaryMessage {
+			// 0. Cache Init Segment (First Chunk)
+			if isFirstChunk {
+				GlobalHub.SetInitSegment(sessionID, p)
+				isFirstChunk = false
+			}
+
 			// 1. Save to disk
 			if _, err := f.Write(p); err != nil {
 				h.Logger.Error("File write error", "error", err)
@@ -103,6 +110,15 @@ func (h *Handler) ParentWSHandler(w http.ResponseWriter, r *http.Request) {
 
 	GlobalHub.RegisterParent(sessionID, conn)
 	defer GlobalHub.UnregisterParent(sessionID)
+
+	// Send Init Segment if available (Critical for late joiners)
+	initSeg := GlobalHub.GetInitSegment(sessionID)
+	if initSeg != nil {
+		if err := conn.WriteMessage(websocket.BinaryMessage, initSeg); err != nil {
+			h.Logger.Error("Init segment write error", "error", err)
+			return
+		}
+	}
 
 	// Keep connection alive, maybe read control messages?
 	for {

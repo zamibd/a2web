@@ -93,6 +93,10 @@ func main() {
 	mux.HandleFunc("/register-page", h.RegisterPageHandler)
 	mux.HandleFunc("/kids/", h.KidsPageHandler)
 
+	// Static Files (CSS/JS)
+	fs := http.FileServer(http.Dir("web/static"))
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	// WebSocket Routes
 	mux.HandleFunc("/ws/kid/", h.KidWSHandler)       // Public, maybe protect with simple token later?
 	mux.HandleFunc("/ws/parent/", h.ParentWSHandler) // Protected by cookie check inside
